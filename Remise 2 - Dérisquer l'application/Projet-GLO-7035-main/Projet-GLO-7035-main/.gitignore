@@ -1,0 +1,13 @@
+node_modules
+package-lock.json
+data
+datasets/**/*
+!datasets/README.txt
+.venv
+# db-mongodb/**/*
+# !db-mongodb/Dockerfile
+# !db-mongodb/.env.example
+# db-neo4j/**/*
+# !db-neo4j/Dockerfile
+# !db-neo4j/.env.example
+__pycache__

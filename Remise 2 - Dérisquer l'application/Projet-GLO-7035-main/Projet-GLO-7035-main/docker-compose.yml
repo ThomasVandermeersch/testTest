@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+
+  # MongoDB
+  db-mongo:
+    container_name: glo7035_mongoDB
+    restart: unless-stopped
+    build: ./db-mongodb
+    env_file:
+      - .env
+    ports:
+      - 27017:27017
+    volumes:
+      - ./db-mongodb/data/db:/data/db
+      - ./db-mongodb/initdb:/docker-entrypoint-initdb.d/
+    networks:
+      - mynet
+    hostname: mongodb
+
+  # Neo4j
+  db-neo4j:
+    container_name: glo7035_neo4jDB
+    restart: unless-stopped
+    build: ./db-neo4j
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - ./db-neo4j/data/conf:/conf
+      - ./db-neo4j/data/data:/data
+      - ./db-neo4j/data/import:/import
+      - ./db-neo4j/data/logs:/logs
+      - ./db-neo4j/data/plugins:/plugins
+    env_file:
+      - .env
+    networks:
+      - mynet
+    hostname: neo4j
+
+  # Web app
+  web:
+    container_name: glo7035_back_api
+    build: ./back-api
+    ports:
+      - 8080:8080
+    depends_on:
+      - db-mongo
+      - db-neo4j
+    networks:
+      - mynet
+    hostname: api
+
+  # Seeding
+  seed-dbs:
+    container_name: glo7035_seed_dbs
+    build: ./script-etl
+    depends_on:
+      - db-mongo
+      - db-neo4j
+    networks:
+      - mynet
+    volumes:
+      - ./datasets:/usr/src/app/datasets:ro
+
+networks:
+  mynet:
+    driver: bridge
